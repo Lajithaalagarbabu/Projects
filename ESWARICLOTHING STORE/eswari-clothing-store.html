@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eswari Clothing Store</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --gold:#C9A84C;--gold-light:#F0D080;--gold-dark:#8B6914;
+    --black:#0A0A0A;--dark:#111318;--card:#1A1D24;--card2:#22262F;
+    --border:#2A2E38;--border2:#353A47;
+    --text:#F5F0E8;--text2:#A8A0948;--muted:#6B7280;
+    --green:#22C55E;--red:#EF4444;--blue:#3B82F6;--purple:#8B5CF6;
+    --sidebar-w:240px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+  h1,h2,h3,.brand{font-family:'Playfair Display',serif}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:var(--dark)}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  input,select,textarea{font-family:'DM Sans',sans-serif}
+  button{font-family:'DM Sans',sans-serif;cursor:pointer}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .fade-in{animation:fadeIn 0.35s ease}
+  .slide-in{animation:slideIn 0.3s ease}
+  @media(max-width:768px){:root{--sidebar-w:0px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const {useState, useEffect, useCallback, useMemo} = React;
+const var_text = '#F5F0E8';
+
+// ─── SAMPLE DATA ─────────────────────────────────────────────────────────────
+const INITIAL_PRODUCTS = [
+  {id:'P001',name:'Silk Saree - Kanjivaram',category:'Sarees',brand:'Eswari',price:4500,stock:12,size:'Free',color:'Red/Gold',image:'👘'},
+  {id:'P002',name:'Cotton Salwar Kameez',category:'Suits',brand:'Eswari',price:1200,stock:25,size:'M/L/XL',color:'Blue',image:'👗'},
+  {id:'P003',name:'Lehenga Choli Set',category:'Ethnic',brand:'Eswari',price:6800,stock:8,size:'S/M/L',color:'Pink',image:'👘'},
+  {id:'P004',name:'Churidar Material',category:'Materials',brand:'Eswari',price:850,stock:40,size:'Free',color:'Green',image:'🧵'},
+  {id:'P005',name:'Designer Blouse',category:'Blouses',brand:'Eswari',price:650,stock:30,size:'32-42',color:'Maroon',image:'👚'},
+  {id:'P006',name:'Cotton Saree - Daily Wear',category:'Sarees',brand:'Eswari',price:800,stock:50,size:'Free',color:'Yellow',image:'👘'},
+  {id:'P007',name:'Pattu Pavadai (Kids)',category:'Kids',brand:'Eswari',price:1500,stock:18,size:'2-12yr',color:'Multicolor',image:'👗'},
+  {id:'P008',name:'Anarkali Suit',category:'Suits',brand:'Eswari',price:2200,stock:15,size:'M/L/XL',color:'Purple',image:'👗'},
+  {id:'P009',name:'Dupatta Set',category:'Accessories',brand:'Eswari',price:350,stock:60,size:'Free',color:'Assorted',image:'🧣'},
+  {id:'P010',name:'Bridal Saree Set',category:'Bridal',brand:'Eswari',price:15000,stock:5,size:'Free',color:'Red/Gold',image:'👘'},
+];
+
+const INITIAL_CUSTOMERS = [
+  {id:'C001',name:'Meenakshi Sundaram',phone:'9876543210',orders:12,points:1200,lastDate:'2024-12-15'},
+  {id:'C002',name:'Lakshmi Priya',phone:'9845123456',orders:8,points:800,lastDate:'2024-12-10'},
+  {id:'C003',name:'Saranya Devi',phone:'9912345678',orders:15,points:1500,lastDate:'2024-12-20'},
+  {id:'C004',name:'Kavitha Rajan',phone:'9876001234',orders:5,points:500,lastDate:'2024-11-30'},
+  {id:'C005',name:'Ponni Muthusamy',phone:'9898765432',orders:20,points:2000,lastDate:'2024-12-18'},
+  {id:'C006',name:'Vijaya Selvi',phone:'9754321098',orders:3,points:300,lastDate:'2024-12-01'},
+  {id:'C007',name:'Malathi Kumar',phone:'9632147852',orders:9,points:900,lastDate:'2024-12-12'},
+];
+
+const INITIAL_BILLS = [
+  {id:'B001',customer:'Meenakshi Sundaram',phone:'9876543210',items:3,amount:6350,date:'2024-12-20',payment:'UPI',status:'Paid'},
+  {id:'B002',customer:'Lakshmi Priya',phone:'9845123456',items:1,amount:4500,date:'2024-12-20',payment:'Cash',status:'Paid'},
+  {id:'B003',customer:'Saranya Devi',phone:'9912345678',items:2,amount:2050,date:'2024-12-19',payment:'Card',status:'Paid'},
+  {id:'B004',customer:'Walk-in Customer',phone:'-',items:4,amount:8200,date:'2024-12-19',payment:'Cash',status:'Paid'},
+  {id:'B005',customer:'Kavitha Rajan',phone:'9876001234',items:1,amount:15000,date:'2024-12-18',payment:'Card',status:'Paid'},
+];
+
+const COUPONS = [
+  {code:'ESWARI10',discount:10,expiry:'2024-12-31',used:45},
+  {code:'NEWYEAR20',discount:20,expiry:'2025-01-05',used:12},
+  {code:'FESTIVAL15',discount:15,expiry:'2024-12-25',used:78},
+];
+
+const MONTHLY_DATA = [
+  {month:'Jul',revenue:185000,orders:42},{month:'Aug',revenue:210000,orders:51},
+  {month:'Sep',revenue:178000,orders:39},{month:'Oct',revenue:245000,orders:68},
+  {month:'Nov',revenue:310000,orders:87},{month:'Dec',revenue:425000,orders:112},
+];
+
+// ─── ICONS ───────────────────────────────────────────────────────────────────
+const Icon = ({name,size=18,style={}}) => {
+  const icons = {
+    dashboard:'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
+    billing:'M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z',
+    products:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z',
+    customers:'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+    inventory:'M20 6h-2.18c.07-.44.18-.88.18-1.35C18 2.53 15.47 0 12.35 0c-1.7 0-3.21.78-4.23 2.01L12 6H20zm-7.45 0l-3.14-3.85C8.93 1.44 8.19 1 7.35 1 5.47 1 4 2.47 4 4.35c0 .47.09.9.18 1.35H2c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-9.45zM2 21c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-9H2v9z',
+    offers:'M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z',
+    analytics:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z',
+    settings:'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
+    logout:'M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z',
+    add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+    edit:'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+    delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+    search:'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+    cart:'M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.43 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z',
+    print:'M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z',
+    bell:'M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z',
+    menu:'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',
+  };
+  const d = icons[name] || icons.dashboard;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={style}>
+      <path d={d}/>
+    </svg>
+  );
+};
+
+// ─── SHARED COMPONENTS ───────────────────────────────────────────────────────
+const Badge = ({children, color='gold'}) => {
+  const colors = {
+    gold:{bg:'rgba(201,168,76,0.15)',text:'#C9A84C'},
+    green:{bg:'rgba(34,197,94,0.15)',text:'#22C55E'},
+    red:{bg:'rgba(239,68,68,0.15)',text:'#EF4444'},
+    blue:{bg:'rgba(59,130,246,0.15)',text:'#3B82F6'},
+    muted:{bg:'rgba(255,255,255,0.06)',text:'#9CA3AF'},
+  };
+  const c = colors[color] || colors.muted;
+  return (
+    <span style={{background:c.bg,color:c.text,padding:'3px 10px',borderRadius:20,fontSize:12,fontWeight:500,whiteSpace:'nowrap'}}>
+      {children}
+    </span>
+  );
+};
+
+const StatCard = ({icon,label,value,sub,color='gold'}) => {
+  const cols = {gold:'#C9A84C',green:'#22C55E',blue:'#3B82F6',purple:'#8B5CF6',red:'#EF4444'};
+  const c = cols[color] || cols.gold;
+  return (
+    <div style={{background:color==='gold'?'linear-gradient(135deg,#1A1D24,#22262F)':'var(--card)',border:`1px solid ${color==='gold'?'rgba(201,168,76,0.3)':'var(--border)'}`,borderRadius:14,padding:'1.25rem 1.5rem',position:'relative',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:-10,right:-10,width:80,height:80,background:`${c}12`,borderRadius:'50%'}}/>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+        <span style={{fontSize:13,color:'#9CA3AF',letterSpacing:'0.03em'}}>{label}</span>
+        <div style={{background:`${c}20`,padding:8,borderRadius:10,color:c}}><Icon name={icon} size={18}/></div>
+      </div>
+      <div style={{fontSize:26,fontWeight:700,fontFamily:'Playfair Display',color:c}}>{value}</div>
+      {sub && <div style={{fontSize:12,color:'#6B7280',marginTop:4}}>{sub}</div>}
+    </div>
+  );
+};
+
+const Btn = ({children,onClick,variant='primary',size='md',icon,disabled=false,style:s={}}) => {
+  const base = {display:'inline-flex',alignItems:'center',gap:6,borderRadius:8,fontWeight:500,cursor:disabled?'not-allowed':'pointer',border:'none',transition:'all 0.2s',opacity:disabled?0.5:1,...s};
+  const sz = size==='sm'?{padding:'5px 12px',fontSize:13}:{padding:'9px 18px',fontSize:14};
+  const vars = {
+    primary:{background:'linear-gradient(135deg,#C9A84C,#8B6914)',color:'#0A0A0A'},
+    ghost:{background:'transparent',color:'#C9A84C',border:'1px solid rgba(201,168,76,0.4)'},
+    danger:{background:'rgba(239,68,68,0.15)',color:'#EF4444',border:'1px solid rgba(239,68,68,0.3)'},
+    dark:{background:'rgba(255,255,255,0.06)',color:'#E5E7EB',border:'1px solid var(--border)'},
+  };
+  return (
+    <button onClick={disabled?undefined:onClick} style={{...base,...sz,...vars[variant]}}>
+      {icon&&<Icon name={icon} size={15}/>}{children}
+    </button>
+  );
+};
+
+const Input = ({label,value,onChange,placeholder,type='text',style:s={}}) => (
+  <div style={{display:'flex',flexDirection:'column',gap:6,...s}}>
+    {label&&<label style={{fontSize:12,color:'#9CA3AF',letterSpacing:'0.04em',textTransform:'uppercase'}}>{label}</label>}
+    <input
+      type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
+      style={{background:'rgba(255,255,255,0.04)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 14px',color:var_text,fontSize:14,outline:'none',transition:'border 0.2s'}}
+      onFocus={e=>e.target.style.borderColor='rgba(201,168,76,0.6)'}
+      onBlur={e=>e.target.style.borderColor='var(--border)'}
+    />
+  </div>
+);
+const Select = ({label,value,onChange,options}) => (
+  <div style={{display:'flex',flexDirection:'column',gap:6}}>
+    {label&&<label style={{fontSize:12,color:'#9CA3AF',letterSpacing:'0.04em',textTransform:'uppercase'}}>{label}</label>}
+    <select value={value} onChange={e=>onChange(e.target.value)}
+      style={{background:'rgba(255,255,255,0.04)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 14px',color:'#F5F0E8',fontSize:14,outline:'none'}}>
+      {options.map(o=><option key={o.value||o} value={o.value||o} style={{background:'#1A1D24'}}>{o.label||o}</option>)}
+    </select>
+  </div>
+);
+
+const Modal = ({show,onClose,title,children,width=480}) => {
+  if(!show)return null;
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}} onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div style={{background:'#1A1D24',border:'1px solid var(--border)',borderRadius:16,width:'100%',maxWidth:width,maxHeight:'90vh',overflowY:'auto',animation:'fadeIn 0.2s ease'}} className="fade-in">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'1.25rem 1.5rem',borderBottom:'1px solid var(--border)'}}>
+          <h2 style={{fontSize:18,fontWeight:600,color:'#C9A84C'}}>{title}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',cursor:'pointer',fontSize:20,lineHeight:1}}>✕</button>
+        </div>
+        <div style={{padding:'1.5rem'}}>{children}</div>
+      </div>
+    </div>
+  );
+};
+
+const Toast = ({message,type,onDone}) => {
+  useEffect(()=>{const t=setTimeout(onDone,2500);return()=>clearTimeout(t)},[]);
+  const colors = {success:'#22C55E',error:'#EF4444',info:'#3B82F6'};
+  return (
+    <div style={{position:'fixed',bottom:24,right:24,background:'#1A1D24',border:`1px solid ${colors[type]||colors.info}`,borderRadius:10,padding:'12px 20px',color:'#F5F0E8',fontSize:14,fontWeight:500,zIndex:9999,display:'flex',alignItems:'center',gap:10,boxShadow:'0 8px 32px rgba(0,0,0,0.4)',animation:'slideIn 0.3s ease'}}>
+      <span style={{color:colors[type]||colors.info,fontSize:18}}>{type==='success'?'✓':type==='error'?'✗':'ℹ'}</span>
+      {message}
+    </div>
+  );
+};
+
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+const Sidebar = ({page, setPage, open, setOpen}) => {
+  const items = [
+    {id:'dashboard',icon:'dashboard',label:'Dashboard'},
+    {id:'billing',icon:'billing',label:'Billing / POS'},
+    {id:'products',icon:'products',label:'Products'},
+    {id:'customers',icon:'customers',label:'Customers'},
+    {id:'inventory',icon:'inventory',label:'Inventory'},
+    {id:'offers',icon:'offers',label:'Offers'},
+    {id:'analytics',icon:'analytics',label:'Analytics'},
+    {id:'settings',icon:'settings',label:'Settings'},
+  ];
+  return (
+    <>
+      {open&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:98}} onClick={()=>setOpen(false)}/>}
+      <nav style={{
+        position:'fixed',top:0,left:0,height:'100vh',width:240,background:'#111318',
+        borderRight:'1px solid var(--border)',zIndex:99,display:'flex',flexDirection:'column',
+        transform:open||window.innerWidth>768?'translateX(0)':'translateX(-100%)',
+        transition:'transform 0.3s ease',
+      }}>
+        <div style={{padding:'1.5rem 1.25rem 1.25rem',borderBottom:'1px solid var(--border)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <div style={{width:38,height:38,borderRadius:10,background:'linear-gradient(135deg,#C9A84C,#8B6914)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🛍</div>
+            <div>
+              <div style={{fontFamily:'Playfair Display',fontSize:15,fontWeight:700,color:'#C9A84C',lineHeight:1.2}}>Eswari</div>
+              <div style={{fontSize:11,color:'#6B7280',letterSpacing:'0.08em'}}>CLOTHING STORE</div>
+            </div>
+          </div>
+        </div>
+        <div style={{flex:1,overflowY:'auto',padding:'0.75rem 0'}}>
+          {items.map(item=>(
+            <button key={item.id} onClick={()=>{setPage(item.id);setOpen(false)}}
+              style={{
+                width:'100%',display:'flex',alignItems:'center',gap:12,padding:'11px 20px',
+                background:page===item.id?'linear-gradient(90deg,rgba(201,168,76,0.15),transparent)':'transparent',
+                border:'none',borderLeft:page===item.id?'2px solid #C9A84C':'2px solid transparent',
+                color:page===item.id?'#C9A84C':'#6B7280',cursor:'pointer',
+                fontSize:14,fontWeight:page===item.id?500:400,transition:'all 0.2s',textAlign:'left',
+              }}>
+              <Icon name={item.icon} size={17}/>
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div style={{padding:'1rem 1.25rem',borderTop:'1px solid var(--border)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+            <div style={{width:34,height:34,borderRadius:'50%',background:'linear-gradient(135deg,#C9A84C50,#8B691430)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#C9A84C',fontWeight:600}}>ES</div>
+            <div>
+              <div style={{fontSize:13,fontWeight:500,color:'#E5E7EB'}}>Admin</div>
+              <div style={{fontSize:11,color:'#6B7280'}}>Store Manager</div>
+            </div>
+          </div>
+          <button onClick={()=>setPage('login')} style={{width:'100%',display:'flex',alignItems:'center',gap:8,background:'none',border:'none',color:'#6B7280',cursor:'pointer',fontSize:13,padding:'6px 0'}}>
+            <Icon name='logout' size={15}/>Logout
+          </button>
+        </div>
+      </nav>
+    </>
+  );
+};
+
+// ─── TOPBAR ──────────────────────────────────────────────────────────────────
+const Topbar = ({title, setOpen}) => (
+  <div style={{height:58,background:'rgba(17,19,24,0.9)',backdropFilter:'blur(12px)',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 1.5rem',position:'sticky',top:0,zIndex:90}}>
+    <div style={{display:'flex',alignItems:'center',gap:12}}>
+      <button onClick={()=>setOpen(p=>!p)} style={{background:'none',border:'none',color:'#9CA3AF',cursor:'pointer',display:'flex',padding:4}}>
+        <Icon name='menu' size={20}/>
+      </button>
+      <h1 style={{fontSize:17,fontWeight:600,fontFamily:'Playfair Display',color:'#E5E7EB'}}>{title}</h1>
+    </div>
+    <div style={{display:'flex',alignItems:'center',gap:16}}>
+      <div style={{position:'relative',cursor:'pointer'}}>
+        <Icon name='bell' size={20} style={{color:'#9CA3AF'}}/>
+        <span style={{position:'absolute',top:-4,right:-4,width:16,height:16,background:'#C9A84C',borderRadius:'50%',fontSize:9,display:'flex',alignItems:'center',justifyContent:'center',color:'#0A0A0A',fontWeight:700}}>3</span>
+      </div>
+      <div style={{width:32,height:32,borderRadius:'50%',background:'linear-gradient(135deg,#C9A84C,#8B6914)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'#0A0A0A'}}>ES</div>
+    </div>
+  </div>
+);
+
+// ─── PAGES ───────────────────────────────────────────────────────────────────
+
+// LOGIN
+const LoginPage = ({onLogin}) => {
+  const [email,setEmail]=useState('admin@eswari.com');
+  const [pass,setPass]=useState('');
+  return (
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#0A0A0A,#111318)',display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
+      <div style={{textAlign:'center',maxWidth:420,width:'100%'}}>
+        <div style={{marginBottom:32}}>
+          <div style={{fontSize:64,marginBottom:8}}>🛍</div>
+          <h1 style={{fontFamily:'Playfair Display',fontSize:32,color:'#C9A84C',marginBottom:4}}>Eswari Clothing Store</h1>
+          <p style={{color:'#6B7280',fontSize:14}}>Premium Ethnic Wear Since 1995</p>
+        </div>
+        <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:16,padding:'2rem',backdropFilter:'blur(20px)'}}>
+          <h2 style={{fontFamily:'Playfair Display',fontSize:22,color:'#E5E7EB',marginBottom:24}}>Admin Login</h2>
+          <div style={{display:'flex',flexDirection:'column',gap:16}}>
+            <Input label="Email" value={email} onChange={setEmail} placeholder="admin@eswari.com"/>
+            <Input label="Password" value={pass} onChange={setPass} placeholder="••••••••" type="password"/>
+          </div>
+          <label style={{display:'flex',alignItems:'center',gap:8,marginTop:14,color:'#9CA3AF',fontSize:13,cursor:'pointer',justifyContent:'flex-start'}}>
+            <input type="checkbox" style={{accentColor:'#C9A84C'}}/> Remember me
+          </label>
+          <button onClick={onLogin} style={{width:'100%',marginTop:20,padding:'12px',background:'linear-gradient(135deg,#C9A84C,#8B6914)',border:'none',borderRadius:10,color:'#0A0A0A',fontSize:15,fontWeight:700,cursor:'pointer',letterSpacing:'0.03em'}}>
+            Sign In →
+          </button>
+          <p style={{color:'#4B5563',fontSize:12,marginTop:14}}>Demo: admin@eswari.com / any password</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── CHART.JS CANVAS COMPONENTS ──────────────────────────────────────────────
+const AreaChartCanvas = ({data, height=200}) => {
+  const ref = React.useRef(null);
+  const chart = React.useRef(null);
+  useEffect(()=>{
+    if(!ref.current||!window.Chart)return;
+    if(chart.current)chart.current.destroy();
+    chart.current = new window.Chart(ref.current,{
+      type:'line',
+      data:{
+        labels:data.map(d=>d.month),
+        datasets:[{label:'Revenue',data:data.map(d=>d.revenue),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.15)',borderWidth:2,fill:true,tension:0.4,pointBackgroundColor:'#C9A84C',pointRadius:4}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`₹${c.raw.toLocaleString()}`}}},scales:{x:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11}}},y:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11},callback:v=>`₹${v/1000}k`}}}}
+    });
+    return()=>{if(chart.current)chart.current.destroy();};
+  },[]);
+  return <canvas ref={ref} height={height} style={{width:'100%',height}}/>;
+};
+
+const DoughnutChartCanvas = () => {
+  const ref = React.useRef(null);
+  const chart = React.useRef(null);
+  useEffect(()=>{
+    if(!ref.current||!window.Chart)return;
+    if(chart.current)chart.current.destroy();
+    chart.current = new window.Chart(ref.current,{
+      type:'doughnut',
+      data:{labels:['Sarees','Suits','Ethnic','Others'],datasets:[{data:[40,25,20,15],backgroundColor:['#C9A84C','#3B82F6','#22C55E','#8B5CF6'],borderWidth:0,hoverOffset:6}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}},cutout:'65%'}
+    });
+    return()=>{if(chart.current)chart.current.destroy();};
+  },[]);
+  return <canvas ref={ref} height={180} style={{width:'100%',height:180}}/>;
+};
+
+const BarChartCanvas = ({data, height=180}) => {
+  const ref = React.useRef(null);
+  const chart = React.useRef(null);
+  useEffect(()=>{
+    if(!ref.current||!window.Chart)return;
+    if(chart.current)chart.current.destroy();
+    chart.current = new window.Chart(ref.current,{
+      type:'bar',
+      data:{labels:data.map(d=>d.month),datasets:[{label:'Orders',data:data.map(d=>d.orders),backgroundColor:'#3B82F6',borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11}}},y:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11}}}}}
+    });
+    return()=>{if(chart.current)chart.current.destroy();};
+  },[]);
+  return <canvas ref={ref} height={height} style={{width:'100%',height}}/>;
+};
+
+const LineChartCanvas = ({data, height=180}) => {
+  const ref = React.useRef(null);
+  const chart = React.useRef(null);
+  useEffect(()=>{
+    if(!ref.current||!window.Chart)return;
+    if(chart.current)chart.current.destroy();
+    chart.current = new window.Chart(ref.current,{
+      type:'line',
+      data:{labels:data.map(d=>d.month),datasets:[{label:'Revenue',data:data.map(d=>d.revenue),borderColor:'#C9A84C',backgroundColor:'transparent',borderWidth:2.5,tension:0.4,pointBackgroundColor:'#C9A84C',pointRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`₹${c.raw.toLocaleString()}`}}},scales:{x:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11}}},y:{grid:{color:'#2A2E38'},ticks:{color:'#6B7280',font:{size:11},callback:v=>`₹${v/1000}k`}}}}
+    });
+    return()=>{if(chart.current)chart.current.destroy();};
+  },[]);
+  return <canvas ref={ref} height={height} style={{width:'100%',height}}/>;
+};
+
+// DASHBOARD
+const DashboardPage = ({products,customers,bills,setPage}) => {
+  const totalRev = bills.reduce((s,b)=>s+b.amount,0);
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:16,marginBottom:24}}>
+        <StatCard icon="analytics" label="Total Revenue" value={`₹${(totalRev/100000).toFixed(1)}L`} sub="This month" color="gold"/>
+        <StatCard icon="billing" label="Total Bills" value={bills.length} sub={`Last bill: ${bills[0]?.date}`} color="blue"/>
+        <StatCard icon="customers" label="Customers" value={customers.length} sub="+2 new this week" color="green"/>
+        <StatCard icon="inventory" label="Products" value={products.length} sub={`${products.filter(p=>p.stock<10).length} low stock`} color="purple"/>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:16,marginBottom:24}}>
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem'}}>
+          <h3 style={{fontSize:14,color:'#9CA3AF',marginBottom:16,letterSpacing:'0.04em'}}>MONTHLY REVENUE</h3>
+          <AreaChartCanvas data={MONTHLY_DATA} height={200}/>
+        </div>
+
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem'}}>
+          <h3 style={{fontSize:14,color:'#9CA3AF',marginBottom:16,letterSpacing:'0.04em'}}>CATEGORY SPLIT</h3>
+          <DoughnutChartCanvas/>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:8}}>
+            {[['Sarees','#C9A84C'],['Suits','#3B82F6'],['Ethnic','#22C55E'],['Others','#8B5CF6']].map(([l,c])=>(
+              <span key={l} style={{fontSize:11,color:'#9CA3AF',display:'flex',alignItems:'center',gap:4}}>
+                <span style={{width:8,height:8,borderRadius:'50%',background:c,display:'inline-block'}}/>
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'1rem 1.25rem',borderBottom:'1px solid var(--border)'}}>
+          <h3 style={{fontSize:15,fontWeight:600}}>Recent Bills</h3>
+          <Btn size="sm" variant="ghost" onClick={()=>setPage('billing')}>View All</Btn>
+        </div>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'rgba(255,255,255,0.03)'}}>
+                {['Bill ID','Customer','Amount','Payment','Date','Status'].map(h=>(
+                  <th key={h} style={{padding:'10px 16px',textAlign:'left',fontSize:12,color:'#6B7280',fontWeight:500,letterSpacing:'0.04em',whiteSpace:'nowrap'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bills.slice(0,5).map((b,i)=>(
+                <tr key={b.id} style={{borderTop:'1px solid var(--border)',background:i%2?'transparent':'rgba(255,255,255,0.01)'}}>
+                  <td style={{padding:'12px 16px',fontSize:13,color:'#C9A84C',fontWeight:500}}>{b.id}</td>
+                  <td style={{padding:'12px 16px',fontSize:13}}>{b.customer}</td>
+                  <td style={{padding:'12px 16px',fontSize:13,fontWeight:600}}>₹{b.amount.toLocaleString()}</td>
+                  <td style={{padding:'12px 16px'}}><Badge color={b.payment==='Cash'?'muted':b.payment==='UPI'?'blue':'green'}>{b.payment}</Badge></td>
+                  <td style={{padding:'12px 16px',fontSize:13,color:'#9CA3AF'}}>{b.date}</td>
+                  <td style={{padding:'12px 16px'}}><Badge color="green">{b.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// BILLING / POS
+const BillingPage = ({products,customers,bills,setBills,toast}) => {
+  const [search,setSearch]=useState('');
+  const [cart,setCart]=useState([]);
+  const [custPhone,setCustPhone]=useState('');
+  const [discount,setDiscount]=useState(0);
+  const [payment,setPayment]=useState('Cash');
+  const [showReceipt,setShowReceipt]=useState(false);
+  const [lastBill,setLastBill]=useState(null);
+  const [coupon,setCoupon]=useState('');
+
+  const filtered = products.filter(p=>
+    p.name.toLowerCase().includes(search.toLowerCase())||p.id.toLowerCase().includes(search.toLowerCase())||p.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const addToCart = p => {
+    setCart(c=>{
+      const ex = c.find(x=>x.id===p.id);
+      if(ex) return c.map(x=>x.id===p.id?{...x,qty:x.qty+1}:x);
+      return [...c,{...p,qty:1}];
+    });
+  };
+  const removeFromCart = id => setCart(c=>c.filter(x=>x.id!==id));
+  const updateQty = (id,delta) => setCart(c=>c.map(x=>x.id===id?{...x,qty:Math.max(1,x.qty+delta)}:x).filter(x=>x.qty>0));
+
+  const subtotal = cart.reduce((s,x)=>s+x.price*x.qty,0);
+  const gst = Math.round(subtotal*0.05);
+  const discAmt = Math.round((subtotal+gst)*discount/100);
+  const total = subtotal+gst-discAmt;
+
+  const applyCoupon = () => {
+    const found = COUPONS.find(c=>c.code===coupon.toUpperCase());
+    if(found){setDiscount(found.discount);toast(`Coupon applied! ${found.discount}% off`,'success');}
+    else toast('Invalid coupon code','error');
+  };
+
+  const generateBill = () => {
+    if(!cart.length){toast('Cart is empty!','error');return;}
+    const bill = {
+      id:`B${String(bills.length+1).padStart(3,'0')}`,
+      customer: customers.find(c=>c.phone===custPhone)?.name||'Walk-in Customer',
+      phone:custPhone||'-',items:cart.length,amount:total,
+      date:new Date().toISOString().slice(0,10),payment,status:'Paid',
+      cart:[...cart],subtotal,gst,discAmt,discount
+    };
+    setBills(b=>[bill,...b]);
+    setLastBill(bill);setShowReceipt(true);
+    setCart([]);setDiscount(0);setCoupon('');setCustPhone('');
+    toast('Bill generated!','success');
+  };
+
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:16,alignItems:'start'}}>
+        {/* Left: Product Search */}
+        <div>
+          <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem',marginBottom:16}}>
+            <div style={{position:'relative',marginBottom:16}}>
+              <Icon name='search' size={16} style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6B7280'}}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name, ID or category…"
+                style={{width:'100%',background:'rgba(255,255,255,0.04)',border:'1px solid var(--border)',borderRadius:8,padding:'10px 12px 10px 36px',color:'#F5F0E8',fontSize:14,outline:'none'}}/>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:10,maxHeight:340,overflowY:'auto'}}>
+              {filtered.map(p=>(
+                <div key={p.id} onClick={()=>addToCart(p)} style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--border)',borderRadius:10,padding:'12px',cursor:'pointer',transition:'all 0.2s'}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(201,168,76,0.5)'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}>
+                  <div style={{fontSize:28,marginBottom:6}}>{p.image}</div>
+                  <div style={{fontSize:12,fontWeight:500,lineHeight:1.3,marginBottom:4,color:'#E5E7EB'}}>{p.name}</div>
+                  <div style={{fontSize:11,color:'#6B7280',marginBottom:6}}>{p.category}</div>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                    <span style={{fontSize:14,fontWeight:700,color:'#C9A84C'}}>₹{p.price.toLocaleString()}</span>
+                    <span style={{fontSize:10,color:p.stock<10?'#EF4444':'#22C55E'}}>Qty:{p.stock}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Cart */}
+        <div style={{background:'var(--card)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:14,overflow:'hidden',position:'sticky',top:70}}>
+          <div style={{padding:'1rem 1.25rem',borderBottom:'1px solid var(--border)',background:'rgba(201,168,76,0.06)'}}>
+            <h3 style={{fontSize:15,fontWeight:600,display:'flex',alignItems:'center',gap:8}}>
+              <Icon name='cart' size={16} style={{color:'#C9A84C'}}/> Cart ({cart.length} items)
+            </h3>
+          </div>
+
+          <div style={{padding:'1rem'}}>
+            <Input label="Customer Phone" value={custPhone} onChange={setCustPhone} placeholder="9876543210"/>
+          </div>
+
+          <div style={{maxHeight:200,overflowY:'auto',padding:'0 1rem'}}>
+            {cart.length===0&&<div style={{textAlign:'center',padding:'1.5rem',color:'#4B5563',fontSize:13}}>Click products to add to cart</div>}
+            {cart.map(item=>(
+              <div key={item.id} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
+                <span style={{fontSize:18}}>{item.image}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:500,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.name}</div>
+                  <div style={{fontSize:11,color:'#C9A84C'}}>₹{item.price.toLocaleString()}</div>
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:4}}>
+                  <button onClick={()=>updateQty(item.id,-1)} style={{width:22,height:22,borderRadius:4,background:'rgba(255,255,255,0.06)',border:'none',color:'#E5E7EB',cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
+                  <span style={{fontSize:13,fontWeight:600,minWidth:20,textAlign:'center'}}>{item.qty}</span>
+                  <button onClick={()=>updateQty(item.id,1)} style={{width:22,height:22,borderRadius:4,background:'rgba(255,255,255,0.06)',border:'none',color:'#E5E7EB',cursor:'pointer',fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+                </div>
+                <button onClick={()=>removeFromCart(item.id)} style={{background:'none',border:'none',color:'#EF4444',cursor:'pointer',padding:2}}><Icon name='delete' size={14}/></button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{padding:'1rem',borderTop:'1px solid var(--border)'}}>
+            <div style={{display:'flex',gap:8,marginBottom:10}}>
+              <input value={coupon} onChange={e=>setCoupon(e.target.value)} placeholder="Coupon code"
+                style={{flex:1,background:'rgba(255,255,255,0.04)',border:'1px solid var(--border)',borderRadius:6,padding:'7px 10px',color:'#F5F0E8',fontSize:13,outline:'none'}}/>
+              <Btn size="sm" variant="ghost" onClick={applyCoupon}>Apply</Btn>
+            </div>
+
+            {[['Subtotal',`₹${subtotal.toLocaleString()}`],['GST (5%)',`₹${gst.toLocaleString()}`],discount>0?['Discount',`-₹${discAmt.toLocaleString()}`]:null].filter(Boolean).map(([l,v])=>(
+              <div key={l} style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13,color:'#9CA3AF'}}>
+                <span>{l}</span><span style={{color:l.includes('Disc')?'#22C55E':'#E5E7EB'}}>{v}</span>
+              </div>
+            ))}
+            <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderTop:'1px solid var(--border)',fontSize:16,fontWeight:700,color:'#C9A84C'}}>
+              <span>Total</span><span>₹{total.toLocaleString()}</span>
+            </div>
+
+            <Select label="Payment Method" value={payment} onChange={setPayment}
+              options={['Cash','Card','UPI'].map(v=>({value:v,label:v}))}/>
+            <button onClick={generateBill} style={{width:'100%',marginTop:12,padding:'11px',background:'linear-gradient(135deg,#C9A84C,#8B6914)',border:'none',borderRadius:10,color:'#0A0A0A',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+              <Icon name='print' size={16}/>Generate Bill
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Receipt Modal */}
+      <Modal show={showReceipt} onClose={()=>setShowReceipt(false)} title="Bill Receipt" width={400}>
+        {lastBill&&(
+          <div>
+            <div style={{textAlign:'center',marginBottom:20,padding:'16px',background:'rgba(201,168,76,0.06)',borderRadius:10}}>
+              <div style={{fontFamily:'Playfair Display',fontSize:20,color:'#C9A84C',marginBottom:4}}>Eswari Clothing Store</div>
+              <div style={{fontSize:12,color:'#6B7280'}}>Chennai, Tamil Nadu | GST: 33ABCDE1234F1Z5</div>
+              <div style={{fontSize:12,color:'#6B7280',marginTop:4}}>Bill No: {lastBill.id} | {lastBill.date}</div>
+            </div>
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:13,color:'#9CA3AF',marginBottom:6}}>Customer: <span style={{color:'#E5E7EB'}}>{lastBill.customer}</span></div>
+              {lastBill.phone!=='-'&&<div style={{fontSize:13,color:'#9CA3AF'}}>Phone: <span style={{color:'#E5E7EB'}}>{lastBill.phone}</span></div>}
+            </div>
+            <div style={{borderTop:'1px dashed var(--border)',paddingTop:12,marginBottom:12}}>
+              {lastBill.cart.map(item=>(
+                <div key={item.id} style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:6}}>
+                  <span style={{color:'#E5E7EB'}}>{item.name} × {item.qty}</span>
+                  <span style={{color:'#C9A84C'}}>₹{(item.price*item.qty).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{borderTop:'1px dashed var(--border)',paddingTop:12}}>
+              {[['Subtotal',`₹${lastBill.subtotal.toLocaleString()}`],['GST (5%)',`₹${lastBill.gst.toLocaleString()}`],lastBill.discount>0?['Discount',`-₹${lastBill.discAmt.toLocaleString()}`]:null].filter(Boolean).map(([l,v])=>(
+                <div key={l} style={{display:'flex',justifyContent:'space-between',fontSize:13,color:'#9CA3AF',marginBottom:4}}>
+                  <span>{l}</span><span>{v}</span>
+                </div>
+              ))}
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:16,fontWeight:700,color:'#C9A84C',borderTop:'1px solid var(--border)',paddingTop:10,marginTop:6}}>
+                <span>TOTAL</span><span>₹{lastBill.amount.toLocaleString()}</span>
+              </div>
+              <div style={{textAlign:'center',marginTop:14,fontSize:12,color:'#22C55E',fontWeight:500}}>✓ Paid via {lastBill.payment}</div>
+            </div>
+            <div style={{textAlign:'center',marginTop:16,padding:'12px',background:'rgba(201,168,76,0.06)',borderRadius:8}}>
+              <div style={{fontSize:12,color:'#6B7280'}}>Thank you for shopping at Eswari!</div>
+              <div style={{fontSize:11,color:'#4B5563',marginTop:2}}>Visit us again • Follow us on Instagram @eswariclothing</div>
+            </div>
+            <Btn icon="print" onClick={()=>{window.print();}} style={{width:'100%',marginTop:12,justifyContent:'center'}}>Print Bill</Btn>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+// PRODUCTS
+const ProductsPage = ({products,setProducts,toast}) => {
+  const [search,setSearch]=useState('');
+  const [showAdd,setShowAdd]=useState(false);
+  const [editItem,setEditItem]=useState(null);
+  const [form,setForm]=useState({name:'',category:'',brand:'Eswari',price:'',stock:'',size:'',color:'',image:'👗',description:''});
+  const cats = ['Sarees','Suits','Ethnic','Materials','Blouses','Kids','Accessories','Bridal'];
+  const filtered = products.filter(p=>p.name.toLowerCase().includes(search.toLowerCase())||p.category.toLowerCase().includes(search.toLowerCase()));
+
+  const save = () => {
+    if(!form.name||!form.price){toast('Fill required fields','error');return;}
+    if(editItem){
+      setProducts(ps=>ps.map(p=>p.id===editItem.id?{...editItem,...form,price:+form.price,stock:+form.stock}:p));
+      toast('Product updated','success');
+    } else {
+      const np = {...form,id:`P${String(products.length+1).padStart(3,'0')}`,price:+form.price,stock:+form.stock};
+      setProducts(ps=>[np,...ps]);
+      toast('Product added','success');
+    }
+    setShowAdd(false);setEditItem(null);
+    setForm({name:'',category:'',brand:'Eswari',price:'',stock:'',size:'',color:'',image:'👗',description:''});
+  };
+
+  const del = id => {setProducts(ps=>ps.filter(p=>p.id!==id));toast('Product deleted','info');};
+  const openEdit = p => {setForm({...p,price:String(p.price),stock:String(p.stock)});setEditItem(p);setShowAdd(true);};
+
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:12}}>
+        <div style={{position:'relative'}}>
+          <Icon name='search' size={16} style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6B7280'}}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search products…"
+            style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 12px 9px 36px',color:'#F5F0E8',fontSize:14,outline:'none',width:260}}/>
+        </div>
+        <Btn icon="add" onClick={()=>{setEditItem(null);setForm({name:'',category:'Sarees',brand:'Eswari',price:'',stock:'',size:'',color:'',image:'👗',description:''});setShowAdd(true)}}>
+          Add Product
+        </Btn>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'rgba(255,255,255,0.03)'}}>
+                {['','ID','Name','Category','Price','Stock','Size','Color','Actions'].map(h=>(
+                  <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:12,color:'#6B7280',fontWeight:500,letterSpacing:'0.04em',whiteSpace:'nowrap'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((p,i)=>(
+                <tr key={p.id} style={{borderTop:'1px solid var(--border)',background:i%2?'transparent':'rgba(255,255,255,0.01)'}}>
+                  <td style={{padding:'10px 16px',fontSize:22}}>{p.image}</td>
+                  <td style={{padding:'10px 16px',fontSize:12,color:'#C9A84C'}}>{p.id}</td>
+                  <td style={{padding:'10px 16px',fontSize:13,fontWeight:500}}>{p.name}</td>
+                  <td style={{padding:'10px 16px'}}><Badge color="blue">{p.category}</Badge></td>
+                  <td style={{padding:'10px 16px',fontSize:13,fontWeight:600,color:'#C9A84C'}}>₹{p.price.toLocaleString()}</td>
+                  <td style={{padding:'10px 16px'}}><Badge color={p.stock<10?'red':p.stock<20?'gold':'green'}>{p.stock}</Badge></td>
+                  <td style={{padding:'10px 16px',fontSize:12,color:'#9CA3AF'}}>{p.size}</td>
+                  <td style={{padding:'10px 16px',fontSize:12,color:'#9CA3AF'}}>{p.color}</td>
+                  <td style={{padding:'10px 16px'}}>
+                    <div style={{display:'flex',gap:8}}>
+                      <Btn size="sm" variant="dark" icon="edit" onClick={()=>openEdit(p)}>Edit</Btn>
+                      <Btn size="sm" variant="danger" icon="delete" onClick={()=>del(p.id)}>Del</Btn>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal show={showAdd} onClose={()=>setShowAdd(false)} title={editItem?'Edit Product':'Add Product'}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <Input label="Product Name *" value={form.name} onChange={v=>setForm(f=>({...f,name:v}))} placeholder="e.g. Silk Saree" style={{gridColumn:'1/-1'}}/>
+          <Select label="Category" value={form.category} onChange={v=>setForm(f=>({...f,category:v}))} options={cats.map(c=>({value:c,label:c}))}/>
+          <Input label="Brand" value={form.brand} onChange={v=>setForm(f=>({...f,brand:v}))} placeholder="Brand name"/>
+          <Input label="Price (₹) *" value={form.price} onChange={v=>setForm(f=>({...f,price:v}))} placeholder="0" type="number"/>
+          <Input label="Stock Qty" value={form.stock} onChange={v=>setForm(f=>({...f,stock:v}))} placeholder="0" type="number"/>
+          <Input label="Size" value={form.size} onChange={v=>setForm(f=>({...f,size:v}))} placeholder="S/M/L/XL"/>
+          <Input label="Color" value={form.color} onChange={v=>setForm(f=>({...f,color:v}))} placeholder="e.g. Red/Gold"/>
+          <Input label="Image (emoji)" value={form.image} onChange={v=>setForm(f=>({...f,image:v}))} placeholder="👗"/>
+        </div>
+        <div style={{display:'flex',gap:10,marginTop:20,justifyContent:'flex-end'}}>
+          <Btn variant="dark" onClick={()=>setShowAdd(false)}>Cancel</Btn>
+          <Btn onClick={save}>{editItem?'Update':'Add Product'}</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+// CUSTOMERS
+const CustomersPage = ({customers,setCustomers,toast}) => {
+  const [search,setSearch]=useState('');
+  const [showAdd,setShowAdd]=useState(false);
+  const [form,setForm]=useState({name:'',phone:'',orders:0,points:0,lastDate:new Date().toISOString().slice(0,10)});
+  const filtered = customers.filter(c=>c.name.toLowerCase().includes(search.toLowerCase())||c.phone.includes(search));
+
+  const save = () => {
+    if(!form.name||!form.phone){toast('Name and phone required','error');return;}
+    setCustomers(cs=>[{...form,id:`C${String(customers.length+1).padStart(3,'0')}`,orders:+form.orders,points:+form.points},...cs]);
+    toast('Customer added','success');setShowAdd(false);
+    setForm({name:'',phone:'',orders:0,points:0,lastDate:new Date().toISOString().slice(0,10)});
+  };
+
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:12,marginBottom:20}}>
+        <StatCard icon="customers" label="Total Customers" value={customers.length} color="gold"/>
+        <StatCard icon="analytics" label="Avg Orders" value={(customers.reduce((s,c)=>s+c.orders,0)/customers.length||0).toFixed(1)} color="blue"/>
+        <StatCard icon="offers" label="Total Points Given" value={(customers.reduce((s,c)=>s+c.points,0)/1000).toFixed(1)+'K'} color="purple"/>
+      </div>
+
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:12}}>
+        <div style={{position:'relative'}}>
+          <Icon name='search' size={16} style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6B7280'}}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name or phone…"
+            style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 12px 9px 36px',color:'#F5F0E8',fontSize:14,outline:'none',width:280}}/>
+        </div>
+        <Btn icon="add" onClick={()=>setShowAdd(true)}>Add Customer</Btn>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'rgba(255,255,255,0.03)'}}>
+                {['#','Name','Phone','Total Orders','Loyalty Points','Last Purchase'].map(h=>(
+                  <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:12,color:'#6B7280',fontWeight:500,letterSpacing:'0.04em'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c,i)=>(
+                <tr key={c.id} style={{borderTop:'1px solid var(--border)',background:i%2?'transparent':'rgba(255,255,255,0.01)'}}>
+                  <td style={{padding:'12px 16px'}}>
+                    <div style={{width:32,height:32,borderRadius:'50%',background:'linear-gradient(135deg,rgba(201,168,76,0.3),rgba(139,105,20,0.2))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'#C9A84C'}}>
+                      {c.name.charAt(0)}
+                    </div>
+                  </td>
+                  <td style={{padding:'12px 16px',fontSize:13,fontWeight:500}}>{c.name}</td>
+                  <td style={{padding:'12px 16px',fontSize:13,color:'#9CA3AF'}}>{c.phone}</td>
+                  <td style={{padding:'12px 16px',fontSize:13,fontWeight:600}}>{c.orders}</td>
+                  <td style={{padding:'12px 16px'}}><Badge color={c.points>=1000?'gold':'muted'}>{c.points} pts</Badge></td>
+                  <td style={{padding:'12px 16px',fontSize:13,color:'#9CA3AF'}}>{c.lastDate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal show={showAdd} onClose={()=>setShowAdd(false)} title="Add Customer">
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <Input label="Customer Name *" value={form.name} onChange={v=>setForm(f=>({...f,name:v}))} placeholder="Full name"/>
+          <Input label="Phone Number *" value={form.phone} onChange={v=>setForm(f=>({...f,phone:v}))} placeholder="10-digit mobile number"/>
+          <Input label="Initial Points" value={String(form.points)} onChange={v=>setForm(f=>({...f,points:+v}))} placeholder="0" type="number"/>
+        </div>
+        <div style={{display:'flex',gap:10,marginTop:20,justifyContent:'flex-end'}}>
+          <Btn variant="dark" onClick={()=>setShowAdd(false)}>Cancel</Btn>
+          <Btn onClick={save}>Add Customer</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+// INVENTORY
+const InventoryPage = ({products,setProducts,toast}) => {
+  const low = products.filter(p=>p.stock>0&&p.stock<10);
+  const out = products.filter(p=>p.stock===0);
+  const [search,setSearch]=useState('');
+  const [edit,setEdit]=useState(null);
+  const [newStock,setNewStock]=useState('');
+  const filtered = products.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
+
+  const updateStock = () => {
+    setProducts(ps=>ps.map(p=>p.id===edit.id?{...p,stock:+newStock}:p));
+    toast('Stock updated','success');setEdit(null);
+  };
+
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12,marginBottom:20}}>
+        <StatCard icon="inventory" label="Total Products" value={products.length} color="gold"/>
+        <StatCard icon="analytics" label="In Stock" value={products.filter(p=>p.stock>0).length} color="green"/>
+        <StatCard icon="bell" label="Low Stock" value={low.length} sub="< 10 units" color="purple"/>
+        <StatCard icon="delete" label="Out of Stock" value={out.length} color="red"/>
+      </div>
+
+      {low.length>0&&(
+        <div style={{background:'rgba(239,68,68,0.06)',border:'1px solid rgba(239,68,68,0.3)',borderRadius:12,padding:'1rem 1.25rem',marginBottom:16,display:'flex',alignItems:'flex-start',gap:10}}>
+          <span style={{fontSize:18}}>⚠️</span>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:'#EF4444',marginBottom:4}}>Low Stock Alert!</div>
+            <div style={{fontSize:12,color:'#9CA3AF'}}>{low.map(p=>p.name).join(', ')} — restock needed</div>
+          </div>
+        </div>
+      )}
+
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:12}}>
+        <div style={{position:'relative'}}>
+          <Icon name='search' size={16} style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'#6B7280'}}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search inventory…"
+            style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 12px 9px 36px',color:'#F5F0E8',fontSize:14,outline:'none',width:260}}/>
+        </div>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'rgba(255,255,255,0.03)'}}>
+                {['Product','Category','Price','Stock','Status','Actions'].map(h=>(
+                  <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:12,color:'#6B7280',fontWeight:500,letterSpacing:'0.04em'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((p,i)=>{
+                const status = p.stock===0?'Out of Stock':p.stock<10?'Low Stock':'In Stock';
+                const statusColor = p.stock===0?'red':p.stock<10?'gold':'green';
+                return (
+                  <tr key={p.id} style={{borderTop:'1px solid var(--border)',background:p.stock===0?'rgba(239,68,68,0.03)':p.stock<10?'rgba(201,168,76,0.02)':'transparent'}}>
+                    <td style={{padding:'12px 16px'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:10}}>
+                        <span style={{fontSize:20}}>{p.image}</span>
+                        <div>
+                          <div style={{fontSize:13,fontWeight:500}}>{p.name}</div>
+                          <div style={{fontSize:11,color:'#6B7280'}}>{p.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{padding:'12px 16px'}}><Badge color="blue">{p.category}</Badge></td>
+                    <td style={{padding:'12px 16px',fontSize:13,fontWeight:600,color:'#C9A84C'}}>₹{p.price.toLocaleString()}</td>
+                    <td style={{padding:'12px 16px'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        <div style={{width:60,height:4,background:'rgba(255,255,255,0.08)',borderRadius:2}}>
+                          <div style={{width:`${Math.min(100,p.stock*2)}%`,height:'100%',background:p.stock<10?'#EF4444':'#22C55E',borderRadius:2}}/>
+                        </div>
+                        <span style={{fontSize:13,fontWeight:600}}>{p.stock}</span>
+                      </div>
+                    </td>
+                    <td style={{padding:'12px 16px'}}><Badge color={statusColor}>{status}</Badge></td>
+                    <td style={{padding:'12px 16px'}}>
+                      <Btn size="sm" variant="dark" icon="edit" onClick={()=>{setEdit(p);setNewStock(String(p.stock));}}>Update</Btn>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal show={!!edit} onClose={()=>setEdit(null)} title={`Update Stock: ${edit?.name}`} width={360}>
+        <div style={{marginBottom:16,padding:'12px',background:'rgba(255,255,255,0.03)',borderRadius:8}}>
+          <span style={{fontSize:12,color:'#6B7280'}}>Current Stock: </span>
+          <span style={{fontSize:14,fontWeight:600,color:'#C9A84C'}}>{edit?.stock} units</span>
+        </div>
+        <Input label="New Stock Quantity" value={newStock} onChange={setNewStock} placeholder="Enter quantity" type="number"/>
+        <div style={{display:'flex',gap:10,marginTop:16,justifyContent:'flex-end'}}>
+          <Btn variant="dark" onClick={()=>setEdit(null)}>Cancel</Btn>
+          <Btn onClick={updateStock}>Update Stock</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+// OFFERS
+const OffersPage = ({toast}) => {
+  const [coupons,setCoupons]=useState(COUPONS);
+  const [showAdd,setShowAdd]=useState(false);
+  const [form,setForm]=useState({code:'',discount:'',expiry:''});
+
+  const addCoupon = () => {
+    if(!form.code||!form.discount){toast('Fill required fields','error');return;}
+    setCoupons(cs=>[{...form,discount:+form.discount,used:0},...cs]);
+    toast('Coupon created!','success');setShowAdd(false);
+    setForm({code:'',discount:'',expiry:''});
+  };
+
+  const festivals = [
+    {name:'Pongal Sale',discount:'20%',icon:'🪔',dates:'Jan 10-15'},
+    {name:'Wedding Season',discount:'15%',icon:'💒',dates:'Nov-Feb'},
+    {name:'New Arrivals',discount:'10%',icon:'✨',dates:'Monthly'},
+    {name:'Clearance Sale',discount:'40%',icon:'🏷️',dates:'End of Season'},
+  ];
+
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12,marginBottom:24}}>
+        {festivals.map(f=>(
+          <div key={f.name} style={{background:'linear-gradient(135deg,rgba(201,168,76,0.1),rgba(139,105,20,0.05))',border:'1px solid rgba(201,168,76,0.3)',borderRadius:14,padding:'1.25rem',textAlign:'center'}}>
+            <div style={{fontSize:32,marginBottom:8}}>{f.icon}</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#E5E7EB',marginBottom:4}}>{f.name}</div>
+            <div style={{fontSize:22,fontWeight:700,color:'#C9A84C',fontFamily:'Playfair Display'}}>{f.discount} OFF</div>
+            <div style={{fontSize:11,color:'#6B7280',marginTop:4}}>{f.dates}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+        <h3 style={{fontSize:16,fontWeight:600}}>Active Coupons</h3>
+        <Btn icon="add" onClick={()=>setShowAdd(true)}>Create Coupon</Btn>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,overflow:'hidden'}}>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{background:'rgba(255,255,255,0.03)'}}>
+              {['Coupon Code','Discount','Expiry Date','Times Used','Action'].map(h=>(
+                <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:12,color:'#6B7280',fontWeight:500,letterSpacing:'0.04em'}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((c,i)=>(
+              <tr key={c.code} style={{borderTop:'1px solid var(--border)',background:i%2?'transparent':'rgba(255,255,255,0.01)'}}>
+                <td style={{padding:'14px 16px'}}>
+                  <span style={{fontFamily:'monospace',background:'rgba(201,168,76,0.1)',color:'#C9A84C',padding:'4px 12px',borderRadius:6,fontSize:13,fontWeight:600,border:'1px dashed rgba(201,168,76,0.3)',letterSpacing:'0.08em'}}>
+                    {c.code}
+                  </span>
+                </td>
+                <td style={{padding:'14px 16px',fontSize:18,fontWeight:700,color:'#22C55E'}}>{c.discount}%</td>
+                <td style={{padding:'14px 16px',fontSize:13,color:'#9CA3AF'}}>{c.expiry}</td>
+                <td style={{padding:'14px 16px',fontSize:13,fontWeight:600}}>{c.used} times</td>
+                <td style={{padding:'14px 16px'}}>
+                  <Btn size="sm" variant="danger" onClick={()=>{setCoupons(cs=>cs.filter(x=>x.code!==c.code));toast('Coupon removed','info');}}>Remove</Btn>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Modal show={showAdd} onClose={()=>setShowAdd(false)} title="Create Coupon" width={380}>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <Input label="Coupon Code *" value={form.code} onChange={v=>setForm(f=>({...f,code:v.toUpperCase()}))} placeholder="e.g. SAVE10"/>
+          <Input label="Discount % *" value={form.discount} onChange={v=>setForm(f=>({...f,discount:v}))} placeholder="e.g. 15" type="number"/>
+          <Input label="Expiry Date" value={form.expiry} onChange={v=>setForm(f=>({...f,expiry:v}))} type="date"/>
+        </div>
+        <div style={{display:'flex',gap:10,marginTop:20,justifyContent:'flex-end'}}>
+          <Btn variant="dark" onClick={()=>setShowAdd(false)}>Cancel</Btn>
+          <Btn onClick={addCoupon}>Create</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+// ANALYTICS
+const AnalyticsPage = ({bills,customers}) => {
+  const topCats = [
+    {name:'Sarees',value:40,rev:180000},{name:'Suits',value:25,rev:110000},
+    {name:'Ethnic Wear',value:20,rev:95000},{name:'Bridal',value:10,rev:75000},{name:'Others',value:5,rev:20000}
+  ];
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:1100}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12,marginBottom:24}}>
+        <StatCard icon="analytics" label="Total Revenue" value="₹4.8L" sub="Last 6 months" color="gold"/>
+        <StatCard icon="billing" label="Total Orders" value="399" sub="+18% growth" color="blue"/>
+        <StatCard icon="customers" label="New Customers" value="52" sub="This month" color="green"/>
+        <StatCard icon="offers" label="Avg Order Value" value="₹1,204" sub="Per transaction" color="purple"/>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem'}}>
+          <h3 style={{fontSize:14,color:'#9CA3AF',marginBottom:16,letterSpacing:'0.04em'}}>MONTHLY ORDERS</h3>
+          <BarChartCanvas data={MONTHLY_DATA} height={180}/>
+        </div>
+
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem'}}>
+          <h3 style={{fontSize:14,color:'#9CA3AF',marginBottom:16,letterSpacing:'0.04em'}}>REVENUE GROWTH</h3>
+          <LineChartCanvas data={MONTHLY_DATA} height={180}/>
+        </div>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.25rem'}}>
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Best Selling Categories</h3>
+        {topCats.map(cat=>(
+          <div key={cat.name} style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+            <div style={{fontSize:13,fontWeight:500,minWidth:110,color:'#E5E7EB'}}>{cat.name}</div>
+            <div style={{flex:1,height:8,background:'rgba(255,255,255,0.06)',borderRadius:4}}>
+              <div style={{width:`${cat.value}%`,height:'100%',background:'linear-gradient(90deg,#C9A84C,#8B6914)',borderRadius:4,transition:'width 0.8s ease'}}/>
+            </div>
+            <div style={{fontSize:13,color:'#C9A84C',fontWeight:600,minWidth:50,textAlign:'right'}}>{cat.value}%</div>
+            <div style={{fontSize:12,color:'#6B7280',minWidth:70,textAlign:'right'}}>₹{(cat.rev/1000).toFixed(0)}k</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// SETTINGS
+const SettingsPage = ({toast}) => {
+  const [store,setStore]=useState({name:'Eswari Clothing Store',email:'admin@eswari.com',phone:'9876543210',address:'Anna Nagar, Chennai, Tamil Nadu 600040',gst:'33ABCDE1234F1Z5',currency:'INR',taxRate:'5'});
+  const [pass,setPass]=useState({current:'',new:'',confirm:''});
+  const save = () => toast('Settings saved!','success');
+  const changePass = () => {
+    if(!pass.current||!pass.new){toast('Fill all fields','error');return;}
+    if(pass.new!==pass.confirm){toast('Passwords do not match','error');return;}
+    toast('Password changed!','success');setPass({current:'',new:'',confirm:''});
+  };
+  return (
+    <div className="fade-in" style={{padding:'1.5rem',maxWidth:680}}>
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.5rem',marginBottom:16}}>
+        <h3 style={{fontSize:16,fontWeight:600,marginBottom:20,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:20}}>🏪</span> Store Information
+        </h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <Input label="Store Name" value={store.name} onChange={v=>setStore(s=>({...s,name:v}))} style={{gridColumn:'1/-1'}}/>
+          <Input label="Email" value={store.email} onChange={v=>setStore(s=>({...s,email:v}))}/>
+          <Input label="Phone" value={store.phone} onChange={v=>setStore(s=>({...s,phone:v}))}/>
+          <Input label="Address" value={store.address} onChange={v=>setStore(s=>({...s,address:v}))} style={{gridColumn:'1/-1'}}/>
+          <Input label="GSTIN" value={store.gst} onChange={v=>setStore(s=>({...s,gst:v}))}/>
+          <Input label="Tax Rate %" value={store.taxRate} onChange={v=>setStore(s=>({...s,taxRate:v}))} type="number"/>
+        </div>
+        <div style={{marginTop:16,display:'flex',justifyContent:'flex-end'}}>
+          <Btn onClick={save}>Save Changes</Btn>
+        </div>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.5rem',marginBottom:16}}>
+        <h3 style={{fontSize:16,fontWeight:600,marginBottom:20,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:20}}>🔒</span> Change Password
+        </h3>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <Input label="Current Password" value={pass.current} onChange={v=>setPass(p=>({...p,current:v}))} type="password" placeholder="••••••••"/>
+          <Input label="New Password" value={pass.new} onChange={v=>setPass(p=>({...p,new:v}))} type="password" placeholder="••••••••"/>
+          <Input label="Confirm New Password" value={pass.confirm} onChange={v=>setPass(p=>({...p,confirm:v}))} type="password" placeholder="••••••••"/>
+        </div>
+        <div style={{marginTop:16,display:'flex',justifyContent:'flex-end'}}>
+          <Btn onClick={changePass}>Update Password</Btn>
+        </div>
+      </div>
+
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:14,padding:'1.5rem'}}>
+        <h3 style={{fontSize:16,fontWeight:600,marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:20}}>📱</span> About
+        </h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {[['App Version','v1.0.0'],['Store Code','ESW-CHN-001'],['Timezone','Asia/Kolkata (IST)'],['Language','English / தமிழ்']].map(([l,v])=>(
+            <div key={l} style={{padding:'10px 14px',background:'rgba(255,255,255,0.03)',borderRadius:8}}>
+              <div style={{fontSize:11,color:'#6B7280',marginBottom:2}}>{l}</div>
+              <div style={{fontSize:13,fontWeight:500,color:'#C9A84C'}}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── APP ─────────────────────────────────────────────────────────────────────
+const pageTitles = {dashboard:'Dashboard',billing:'Billing / POS',products:'Products',customers:'Customers',inventory:'Inventory',offers:'Offers & Coupons',analytics:'Analytics',settings:'Settings'};
+
+function App(){
+  const [page,setPage]=useState('login');
+  const [sidebarOpen,setSidebarOpen]=useState(false);
+  const [products,setProducts]=useState(INITIAL_PRODUCTS);
+  const [customers,setCustomers]=useState(INITIAL_CUSTOMERS);
+  const [bills,setBills]=useState(INITIAL_BILLS);
+  const [toastMsg,setToastMsg]=useState(null);
+
+  const toast = (msg,type='info') => setToastMsg({msg,type});
+
+  if(page==='login') return <LoginPage onLogin={()=>setPage('dashboard')}/>;
+
+  return (
+    <div style={{display:'flex',minHeight:'100vh'}}>
+      <Sidebar page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen}/>
+      <div style={{marginLeft:240,flex:1,minWidth:0,transition:'margin 0.3s'}}>
+        <Topbar title={pageTitles[page]||'Dashboard'} setOpen={setSidebarOpen}/>
+        <main>
+          {page==='dashboard'&&<DashboardPage products={products} customers={customers} bills={bills} setPage={setPage}/>}
+          {page==='billing'&&<BillingPage products={products} customers={customers} bills={bills} setBills={setBills} toast={toast}/>}
+          {page==='products'&&<ProductsPage products={products} setProducts={setProducts} toast={toast}/>}
+          {page==='customers'&&<CustomersPage customers={customers} setCustomers={setCustomers} toast={toast}/>}
+          {page==='inventory'&&<InventoryPage products={products} setProducts={setProducts} toast={toast}/>}
+          {page==='offers'&&<OffersPage toast={toast}/>}
+          {page==='analytics'&&<AnalyticsPage bills={bills} customers={customers}/>}
+          {page==='settings'&&<SettingsPage toast={toast}/>}
+        </main>
+      </div>
+      {toastMsg&&<Toast message={toastMsg.msg} type={toastMsg.type} onDone={()=>setToastMsg(null)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

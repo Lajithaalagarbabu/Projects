@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: phc-mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: primary_healthcare
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+
+  backend-api:
+    build:
+      context: ./backend
+    container_name: phc-backend-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/primary_healthcare?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  frontend-ui:
+    build:
+      context: ./frontend
+    container_name: phc-frontend-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-api
+
+volumes:
+  mysql-data:
