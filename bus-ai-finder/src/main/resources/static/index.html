@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Bus Finder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .search-box {
+            margin-top: 25px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 110px;
+            resize: none;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #415EFA;
+            box-shadow: 0 0 0 3px rgba(65, 94, 250, 0.1);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #415EFA;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        #results {
+            margin-top: 30px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .bus-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+        }
+
+        .route {
+            font-size: 19px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .details {
+            display: flex;
+            gap: 20px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+        }
+
+        .error {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #415EFA;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>🚌 AI Bus Finder</h1>
+
+            <p>
+                Find buses using natural language
+            </p>
+        </div>
+
+
+        <div class="search-box">
+
+            <textarea
+                id="message"
+                placeholder="Example: I want a sleeper bus from Madurai to Chennai between 6 PM and 11 PM"></textarea>
+
+            <button id="searchButton" onclick="searchBus()">
+                Search Buses
+            </button>
+
+        </div>
+
+
+        <div id="results"></div>
+
+    </div>
+
+
+    <script>
+
+        async function searchBus() {
+
+            const message =
+                document.getElementById("message").value.trim();
+
+            const results =
+                document.getElementById("results");
+
+            const button =
+                document.getElementById("searchButton");
+
+
+            // Check empty input
+
+            if (!message) {
+
+                results.innerHTML =
+                    '<div class="error">Please describe your bus requirement.</div>';
+
+                return;
+            }
+
+
+            // Loading
+
+            button.disabled = true;
+
+            button.innerText = "Searching...";
+
+            results.innerHTML =
+                '<div class="loading">🤖 AI is finding buses...</div>';
+
+
+            try {
+
+                const response = await fetch("/ai-search", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        message: message
+                    })
+
+                });
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server error: " + response.status
+                    );
+
+                }
+
+
+                const buses = await response.json();
+
+
+                results.innerHTML = "";
+
+
+                // No buses
+
+                if (buses.length === 0) {
+
+                    results.innerHTML =
+                        '<div class="no-results">No matching buses found.</div>';
+
+                    return;
+                }
+
+
+                // Result heading
+
+                results.innerHTML =
+                    '<div class="result-title">Available Buses</div>';
+
+
+                // Display buses
+
+                buses.forEach(bus => {
+
+                    results.innerHTML += `
+
+                        <div class="bus-card">
+
+                            <div class="route">
+                                🚌 ${bus.source}
+                                →
+                                ${bus.destination}
+                            </div>
+
+                            <div class="details">
+
+                                <span>
+                                    🕐 ${bus.departureTime}
+                                </span>
+
+                                <span>
+                                    🛏️ ${bus.busType}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                results.innerHTML =
+                    '<div class="error">Something went wrong. Please try again.</div>';
+
+            } finally {
+
+                button.disabled = false;
+
+                button.innerText = "Search Buses";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
